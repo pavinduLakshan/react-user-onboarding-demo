@@ -3,7 +3,7 @@ const qs = require('qs');
 
 const organizationName = process.env.ASGARDEO_ORG_NAME;
 
-async function getToken() {
+async function getAccessToken() {
     const clientId = process.env.ASGARDEO_CLIENT_ID;
     const clientSecret = process.env.ASGARDEO_CLIENT_SECRET;
     const scope = process.env.ASGARDEO_SCOPE;
@@ -26,8 +26,18 @@ async function getToken() {
         data: data
     };
 
-    const response = await axios(config);
-    return response;
+    try {
+        const response = await axios(config);
+        return {
+            error: null,
+            result: response.data
+        }
+    } catch (err) {
+        return {
+            error: err,
+            result: null
+        }
+    }
 }
 
 /**
@@ -42,7 +52,7 @@ async function getToken() {
  * @param {User} user - new user to be created 
  */
 async function createUser(user) {
-    const { access_token } = await utils.getToken();
+    const { result } = await getAccessToken();
 
     const userData = {
         schemas: [],
@@ -66,7 +76,7 @@ async function createUser(user) {
         headers: {
             'accept': 'application/scim+json',
             'Content-Type': 'application/scim+json',
-            'Authorization': `Bearer ${access_token}`
+            'Authorization': `Bearer ${result.access_token}`
         },
         data: userData
     };
@@ -86,7 +96,36 @@ async function createUser(user) {
     }
 }
 
+async function getSCIMSchemas() {
+    const { result } = await getAccessToken();
+
+    const config = {
+        method: 'get',
+        url: `https://api.asgardeo.io/t/${organizationName}/scim2/Schemas`,
+        headers: {
+            'accept': 'application/scim+json',
+            'Content-Type': 'application/scim+json',
+            'Authorization': `Bearer ${result.access_token}`
+        }
+    };
+
+    try {
+        const response = await axios(config);
+
+        return ({
+            error: null,
+            result: response.data
+        })
+    } catch (error) {
+        return ({
+            error: error,
+            result: null
+        })
+    }
+}
+
 module.exports = {
-    getToken,
-    createUser
+    getAccessToken,
+    createUser,
+    getSCIMSchemas
 }
