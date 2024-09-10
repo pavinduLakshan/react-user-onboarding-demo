@@ -1,7 +1,10 @@
+import { useAuthContext } from "@asgardeo/auth-react"
 import { useState } from 'react'
 import axios from 'axios'
 
 const Register = () => {
+
+    const { signIn } = useAuthContext();
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -13,7 +16,6 @@ const Register = () => {
 
     const register = async (e) => {
       e.preventDefault()
-      console.log(formData)
 
       const response = await axios({
         method: 'post',
@@ -26,14 +28,15 @@ const Register = () => {
         url: 'http://localhost:3000/register'
       })
 
-      console.log(response)
-
+      if (response.status === 201) {
+        signIn()
+      }
     }
     
-
     return (
         <>
-        <form onSubmit={ register } style={{ display: "flex", flexDirection: "column"}}>
+        <h2>Sign Up</h2>
+        <form onSubmit={ register } style={{ display: "flex", flexDirection: "column", textAlign: 'left'}}>
           <label>First name</label>
           <input type="text" name="firstName" onChange={(e) => {
             setFormData({
@@ -76,8 +79,14 @@ const Register = () => {
           }}
           />
   
-          <input type="submit" />
+          <input style={{ marginTop: "5%"}} type="submit" />
         </form>
+
+        <p>-- or --</p>
+      
+        <button onClick={ () => signIn({
+          fidp: "google"
+        }) }>Sign up with Google</button>
       </>
     )
 
