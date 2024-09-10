@@ -124,8 +124,59 @@ async function getSCIMSchemas() {
     }
 }
 
+async function getValidationRules () {
+    const { result } = await getAccessToken();
+
+    const url = `https://api.asgardeo.io/t/${organizationName}/api/server/v1/validation-rules`;
+
+    try {
+        const response = await axios.get(url, {
+            headers: {
+                'accept': 'application/json',
+                'Authorization': 'Bearer ' + result.access_token
+            }
+        })
+
+        return ({
+            error: null,
+            result: response.data
+        })
+    } catch (error) {
+        return ({
+            error: error,
+            result: null
+        })
+    }
+}
+
+async function getUsersByUsername (username) {
+
+    const url = "https://api.asgardeo.io/t/" + organizationName + "/scim2/Users?domain=DEFAULT&filter=userName+eq+" + encodeURIComponent(username);
+    
+    try {
+        const response = await axios.get(url, {
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Authorization': `Bearer ${result.access_token}`
+            }
+        })
+
+        return ({
+            error: null,
+            result: response.data
+        })
+    } catch (error) {
+        return ({
+            error: error,
+            result: null
+        })
+    }
+}
+
 module.exports = {
     getAccessToken,
     createUser,
-    getSCIMSchemas
+    getSCIMSchemas,
+    getValidationRules,
+    getUsersByUsername
 }

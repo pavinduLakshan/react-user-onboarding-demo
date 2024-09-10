@@ -30,15 +30,29 @@ app.post('/register', async (req, res) => {
     if (error) {
       res.status(400).send(error)
     } else {
-      res.send(result)
+      res.status(201).send(result)
     }
 })
 
 app.get('/check-password', async (req, res) => {
+  const {error, result} = await utils.getValidationRules();
 
+  if (error) {
+    res.status(500).send(error)
+  } else {
+    res.send(result)
+  }
 })
 
 app.get('/check-username', async (req,res) => {
+
+  const {error, result} = await utils.checkUsernameAvailability();
+  
+  if (error) {
+    res.status(500).send(error)
+  } else {
+    res.send(result)
+  }
 
 })
 
@@ -46,8 +60,10 @@ app.get('/profile-schema', async (req, res) => {
   const {error, result} = await utils.getSCIMSchemas();
 
   if (error) {
+    console.error(error)
     res.status(500).send(error)
   } else {
+    console.log(result)
     res.send(result)
   }
 })
